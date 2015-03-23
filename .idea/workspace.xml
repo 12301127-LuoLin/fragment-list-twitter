@@ -23,13 +23,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="64f244da-6628-4b70-a776-72e86d3ad7c6" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/java/com/deitel/twittersearches/TagFragment.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/java/com/deitel/twittersearches/WebFragment.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_tag.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_web.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="TwitterSearches.iws" />
@@ -135,7 +128,7 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.0" vertical-offset="93" max-vertical-offset="570">
+            <state vertical-scroll-proportion="1.1324042" vertical-offset="55" max-vertical-offset="570">
               <caret line="20" column="40" selection-start-line="20" selection-start-column="40" selection-end-line="20" selection-end-column="40" />
               <folding />
             </state>
@@ -1179,6 +1172,11 @@
       <created>1426674500957</created>
       <updated>1426674500957</updated>
     </task>
+    <task id="LOCAL-00001" summary="12301127 - LuoLin">
+      <created>1427124903946</created>
+      <updated>1427124903946</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1231,6 +1229,8 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
+    <MESSAGE value="12301127 - LuoLin" />
+    <option name="LAST_COMMIT_MESSAGE" value="12301127 - LuoLin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1490,7 +1490,7 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0" vertical-offset="93" max-vertical-offset="570">
+        <state vertical-scroll-proportion="1.1324042" vertical-offset="55" max-vertical-offset="570">
           <caret line="20" column="40" selection-start-line="20" selection-start-column="40" selection-end-line="20" selection-end-column="40" />
           <folding />
         </state>
