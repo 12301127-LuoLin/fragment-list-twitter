@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -25,8 +26,9 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity
+public class MainActivity extends Activity implements TagFragment.OnFragmentInteractionListener
 {
    // name of SharedPreferences XML file that stores the saved searches 
    private static final String SEARCHES = "searches";
@@ -35,8 +37,9 @@ public class MainActivity extends Activity
    private EditText tagEditText; // EditText where user tags a query
    private SharedPreferences savedSearches; // user's favorite searches
    private ArrayList<String> tags; // list of tags for saved searches
-   private ArrayAdapter<String> adapter; // binds tags to ListView
-   
+   private ArrayAdapter<String> adapter; // binds tags to ListView\
+   private TagFragment tagFragment;
+
    // SOME Changes _ called when MainActivity is first created
    @Override
    protected void onCreate(Bundle savedInstanceState)
@@ -47,14 +50,16 @@ public class MainActivity extends Activity
       // get references to the EditTexts  
       queryEditText = (EditText) findViewById(R.id.queryEditText);
       tagEditText = (EditText) findViewById(R.id.tagEditText);
-      
-      // get the SharedPreferences containing the user's saved searches 
-      savedSearches = getSharedPreferences(SEARCHES, MODE_PRIVATE); 
 
+      queryEditText.setOnFocusChangeListener(textFocusChangeListener);
+      // get the SharedPreferences containing the user's saved searches
+      savedSearches = getSharedPreferences(SEARCHES, MODE_PRIVATE);
+
+      tagFragment = new TagFragment();
       // store the saved tags in an ArrayList then sort them
       tags = new ArrayList<String>(savedSearches.getAll().keySet());
-      Collections.sort(tags, String.CASE_INSENSITIVE_ORDER); 
-      
+      Collections.sort(tags, String.CASE_INSENSITIVE_ORDER);
+
       // create ArrayAdapter and use it to bind tags to the ListView
       adapter = new ArrayAdapter<String>(this, R.layout.list_item, tags);
       // MOVE to ListFragment _ setListAdapter(adapter);
@@ -64,12 +69,19 @@ public class MainActivity extends Activity
          (ImageButton) findViewById(R.id.saveButton);
       saveButton.setOnClickListener(saveButtonListener);
 
-      // MOVE to ListFragment _ register listener that searches Twitter when user touches a tag
-      //getListView().setOnItemClickListener(itemClickListener);
-      
-      // MOVE to ListFragment _  set listener that allows user to delete or edit a search
-      //getListView().setOnItemLongClickListener(itemLongClickListener);
+
+       getFragmentManager()
+               .beginTransaction()
+               .add(R.id.fragment_holder, tagFragment)
+               .commit();
+
+       tagFragment.setAdapter(adapter);
+       tagFragment.setSavedSearches(savedSearches);
+       //tagFragment.setMyOnItemLongClickListener(getOnItemLongClickListener());
+
+
    } // end method onCreate
+
 
    // NO CHANGES _  saveButtonListener saves a tag-query pair into SharedPreferences
    public OnClickListener saveButtonListener = new OnClickListener() 
@@ -116,38 +128,20 @@ public class MainActivity extends Activity
       SharedPreferences.Editor preferencesEditor = savedSearches.edit();
       preferencesEditor.putString(tag, query); // store current search
       preferencesEditor.apply(); // store the updated preferences
-      
+
       // if tag is new, add to and sort tags, then display updated list
       if (!tags.contains(tag))
       {
          tags.add(tag); // add new tag
          Collections.sort(tags, String.CASE_INSENSITIVE_ORDER);
          adapter.notifyDataSetChanged(); // rebind tags to ListView
+         tagFragment.getAdapter().notifyDataSetChanged();
       }
-   } 
+   }
    
-   /* MOVE to ListFragment and Activity Interface implementation
-   OnItemClickListener itemClickListener = new OnItemClickListener() 
-   {
-      @Override
-      public void onItemClick(AdapterView<?> parent, View view, 
-         int position, long id) 
-      {
-         // get query string and create a URL representing the search
-         String tag = ((TextView) view).getText().toString();
-         String urlString = getString(R.string.searchURL) +
-            Uri.encode(savedSearches.getString(tag, ""), "UTF-8");
-         
-         // create an Intent to launch a web browser    
-         Intent webIntent = new Intent(Intent.ACTION_VIEW, 
-            Uri.parse(urlString));                      
-
-         startActivity(webIntent); // launches web browser to view results
-      } 
-   }; // end itemClickListener declaration*/
-   
-   // CHANGED _ to provide itemLongClickListener to the ListFragment
+    // CHANGED _ to provide itemLongClickListener to the ListFragment
    // displays a dialog allowing the user to delete or edit a saved search
+   @Override
    public OnItemLongClickListener getOnItemLongClickListener() {
        return new OnItemLongClickListener() {
            @Override
@@ -206,7 +200,7 @@ public class MainActivity extends Activity
    }; // end get method
 
    // NO CHANGES _ allows user to choose an app for sharing a saved search's URL
-   private void shareSearch(String tag)
+   public void shareSearch(String tag)
    {
       // create the URL representing the search
       String urlString = getString(R.string.searchURL) +
@@ -215,15 +209,15 @@ public class MainActivity extends Activity
       // create Intent to share urlString
       Intent shareIntent = new Intent();
       shareIntent.setAction(Intent.ACTION_SEND);
-      shareIntent.putExtra(Intent.EXTRA_SUBJECT, 
+      shareIntent.putExtra(Intent.EXTRA_SUBJECT,
          getString(R.string.shareSubject));
-      shareIntent.putExtra(Intent.EXTRA_TEXT, 
+      shareIntent.putExtra(Intent.EXTRA_TEXT,
          getString(R.string.shareMessage, urlString));
       shareIntent.setType("text/plain");
-      
+
       // display apps that can share text
-      startActivity(Intent.createChooser(shareIntent, 
-         getString(R.string.shareSearch)));   
+      startActivity(Intent.createChooser(shareIntent,
+         getString(R.string.shareSearch)));
    }
 
    // NO CHANGES _  deletes a search after the user confirms the delete operation
@@ -231,50 +225,89 @@ public class MainActivity extends Activity
    {
       // create a new AlertDialog
       AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(this);
-      
+
       // set the AlertDialog's message
       confirmBuilder.setMessage(
          getString(R.string.confirmMessage, tag));
 
       // set the AlertDialog's negative Button
-      confirmBuilder.setNegativeButton( getString(R.string.cancel), 
-         new DialogInterface.OnClickListener() 
+      confirmBuilder.setNegativeButton( getString(R.string.cancel),
+         new DialogInterface.OnClickListener()
          {
             // called when "Cancel" Button is clicked
-            public void onClick(DialogInterface dialog, int id) 
+            public void onClick(DialogInterface dialog, int id)
             {
                dialog.cancel(); // dismiss dialog
-            } 
-         } 
+            }
+         }
       ); // end call to setNegativeButton
-      
+
       // set the AlertDialog's positive Button
-      confirmBuilder.setPositiveButton(getString(R.string.delete), 
-         new DialogInterface.OnClickListener() 
+      confirmBuilder.setPositiveButton(getString(R.string.delete),
+         new DialogInterface.OnClickListener()
          {
             // called when "Cancel" Button is clicked
-            public void onClick(DialogInterface dialog, int id) 
+            public void onClick(DialogInterface dialog, int id)
             {
                tags.remove(tag); // remove tag from tags
-               
+
                // get SharedPreferences.Editor to remove saved search
-               SharedPreferences.Editor preferencesEditor = 
-                  savedSearches.edit();                   
+               SharedPreferences.Editor preferencesEditor =
+                  savedSearches.edit();
                preferencesEditor.remove(tag); // remove search
                preferencesEditor.apply(); // saves the changes
 
                // rebind tags ArrayList to ListView to show updated list
-               adapter.notifyDataSetChanged();                    
+               adapter.notifyDataSetChanged();
             }
          } // end OnClickListener
       ); // end call to setPositiveButton
 
-      confirmBuilder.create().show(); // display AlertDialog    
+      confirmBuilder.create().show(); // display AlertDialog
    } // end method deleteSearch
 
    // ADDED to set up the ListFragment
    public ArrayAdapter<String> getAdapter(){return adapter;}
 
+    public View.OnFocusChangeListener textFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View view, boolean b) {
+
+            String website = queryEditText.getText().toString();
+            if(website.contains("http://")){
+                website = website.replaceAll("http://","");
+                Toast.makeText
+                        (MainActivity.this,"'http://' is unnecessary.",Toast.LENGTH_SHORT)
+                        .show();
+                queryEditText.setText(website);
+            }
+        }
+    };
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void sendUrlToWebFragment(String url) {
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_holder,WebFragment.newInstance(url))
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager()
+                    .popBackStack();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
 } // end class MainActivity
 
 
