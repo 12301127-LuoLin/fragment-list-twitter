@@ -17,7 +17,7 @@
         android:layout_gravity="fill_horizontal"
         android:hint="@string/queryPrompt"
         android:imeOptions="actionNext" >
-         
+
         <requestFocus/>
     </EditText>
 
@@ -53,7 +53,7 @@
         android:paddingTop="@dimen/activity_vertical_margin" >
 
 
-        
+
     </LinearLayout>
 
 </GridLayout>
